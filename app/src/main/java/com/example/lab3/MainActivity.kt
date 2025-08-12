@@ -1,4 +1,5 @@
 package com.example.lab3
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -6,103 +7,118 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.lab3.ui.theme.Lab3TareasTheme
+import com.example.lab3.ui.theme.LAB3Theme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Lab3ListaTareasTheme {
+            LAB3Theme {
                 MainScreen()
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Imagen de fondo
-        Image(
-            painter = painterResource(id = R.drawable.fondo), // Cambia "fondo" por el nombre real de tu imagen
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+    // Estado de la lista y campo de texto
+    val tareas = remember { mutableStateListOf<String>() }
+    var textValue by rememberSaveable { mutableStateOf("") }
 
-        Column(
+    // Snackbar y corrutina para mostrarlo
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(paddingValues)
         ) {
-            // Título
-            Text(
-                text = stringResource(id = R.string.app_title)
+            // Imagen de fondo
+            Image(
+                painter = painterResource(id = R.drawable.fondo),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Título
+                Text(
+                    text = stringResource(id = R.string.app_title),
+                    style = MaterialTheme.typography.headlineMedium
+                )
 
-            // Lista vacía inicial (simulada con placeholder)
-            val tareas = listOf<String>() // Persona 2 conectará aquí el estado real
-            if (tareas.isEmpty()) {
-                Text(text = stringResource(id = R.string.lista_vacia))
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f) // Para que la lista ocupe el espacio sobrante
-                ) {
-                    items(tareas) { tarea ->
-                        Text(text = tarea)
-                        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Lista de tareas
+                if (tareas.isEmpty()) {
+                    Text(text = stringResource(id = R.string.lista_vacia))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        items(tareas) { tarea ->
+                            Text(text = tarea)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto (sin lógica todavía)
-            var textValue by remember { mutableStateOf(TextFieldValue("")) }
-            OutlinedTextField(
-                value = textValue,
-                onValueChange = { textValue = it },
-                label = { Text(stringResource(id = R.string.hint_nueva_tarea)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+                // Campo de texto
+                OutlinedTextField(
+                    value = textValue,
+                    onValueChange = { textValue = it },
+                    label = { Text(stringResource(id = R.string.hint_nueva_tarea)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón (lógica vendrá después)
-            Button(
-                onClick = { /* TODO: Persona 2 agregará la lógica */ },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(id = R.string.boton_agregar))
+                // Botón para agregar
+                val errorCampoVacio = stringResource(id = R.string.error_campo_vacio)
+                Button(
+                    onClick = {
+                        if (textValue.isBlank()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message = errorCampoVacio)
+                            }
+                        } else {
+                            tareas.add(textValue)
+                            textValue = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.boton_agregar))
+                }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    Lab3ListaTareasTheme {
-        MainScreen()
     }
 }

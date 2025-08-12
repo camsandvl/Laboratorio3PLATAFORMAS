@@ -1,7 +1,8 @@
 <resources>
-    <string name="app_name">Lab3 Lista de Tareas</string>
+    <string name="app_name">LAB3 Lista de Tareas</string>
     <string name="app_title">Lista de Tareas</string>
     <string name="lista_vacia">No hay tareas todavía</string>
     <string name="hint_nueva_tarea">Escribe una nueva tarea</string>
     <string name="boton_agregar">Agregar</string>
+    <string name="error_campo_vacio">Por favor, escribe una tarea</string>
 </resources>
