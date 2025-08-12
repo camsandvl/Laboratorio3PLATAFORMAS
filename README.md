@@ -26,3 +26,7 @@ Aplicación Android que permite agregar tareas a una lista y visualizarlas. La i
 
 
 
+https://github.com/user-attachments/assets/8042921b-0d4a-4207-ab32-16e043e63764
+
+
+
